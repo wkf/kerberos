@@ -37,12 +37,12 @@ public:
   // Public constructor
   static KerberosContext* New();
 
-  // Handle to the kerberos context
-  gss_client_state *state;
+  gss_client_state *client_state;
+  gss_server_state *server_state;
 
 private:
-  static Handle<Value> New(const Arguments &args);  
+  static Handle<Value> New(const Arguments &args);
 
-  static Handle<Value> ResponseGetter(Local<String> property, const AccessorInfo& info);  
+  static Handle<Value> ResponseGetter(Local<String> property, const AccessorInfo& info);
 };
 #endif

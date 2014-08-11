@@ -37,8 +37,12 @@ public:
   static Handle<Value> AuthGSSClientWrap(const Arguments &args);
   static Handle<Value> AuthGSSClientClean(const Arguments &args);
 
+  static Handle<Value> AuthGSSServerInit(const Arguments &args);
+  static Handle<Value> AuthGSSServerStep(const Arguments &args);
+  static Handle<Value> AuthGSSServerClean(const Arguments &args);
+
 private:
-  static Handle<Value> New(const Arguments &args);  
+  static Handle<Value> New(const Arguments &args);
 
   // Handles the uv calls
   static void Process(uv_work_t* work_req);

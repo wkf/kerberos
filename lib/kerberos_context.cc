@@ -3,6 +3,8 @@
 Persistent<FunctionTemplate> KerberosContext::constructor_template;
 
 KerberosContext::KerberosContext() : ObjectWrap() {
+  client_state = NULL;
+  server_state = NULL;
 }
 
 KerberosContext::~KerberosContext() {
@@ -10,21 +12,21 @@ KerberosContext::~KerberosContext() {
 
 KerberosContext* KerberosContext::New() {
   HandleScope scope;
-  
+
   Local<Object> obj = constructor_template->GetFunction()->NewInstance();
-  KerberosContext *kerberos_context = ObjectWrap::Unwrap<KerberosContext>(obj);  
-  
+  KerberosContext *kerberos_context = ObjectWrap::Unwrap<KerberosContext>(obj);
+
   return kerberos_context;
 }
 
 Handle<Value> KerberosContext::New(const Arguments &args) {
-  HandleScope scope;    
+  HandleScope scope;
   // Create code object
   KerberosContext *kerberos_context = new KerberosContext();
   // Wrap it
   kerberos_context->Wrap(args.This());
   // Return the object
-  return args.This();    
+  return args.This();
 }
 
 static Persistent<String> response_symbol;
@@ -40,7 +42,7 @@ void KerberosContext::Initialize(Handle<Object> target) {
 
   // Property symbols
   response_symbol = NODE_PSYMBOL("response");
-    
+
   // Getter for the response
   constructor_template->InstanceTemplate()->SetAccessor(response_symbol, ResponseGetter);
 
@@ -48,27 +50,25 @@ void KerberosContext::Initialize(Handle<Object> target) {
   target->Set(String::NewSymbol("KerberosContext"), constructor_template->GetFunction());
 }
 
-//
 // Response Setter / Getter
 Handle<Value> KerberosContext::ResponseGetter(Local<String> property, const AccessorInfo& info) {
   HandleScope scope;
-  gss_client_state *state;
 
-  // Unpack the object
+  gss_client_state *client_state;
+  gss_server_state *server_state;
+
   KerberosContext *context = ObjectWrap::Unwrap<KerberosContext>(info.Holder());
-  // Let's grab the response
-  state = context->state;
-  // No state no response
-  if(state == NULL || state->response == NULL) return scope.Close(Null());
-  // Return the response
-  return scope.Close(String::New(state->response));
+
+  client_state = context->client_state;
+  server_state = context->server_state;
+
+  if(client_state == NULL || client_state->response == NULL) {
+    if(server_state == NULL || server_state->response == NULL) {
+      return scope.Close(Null());
+    } else {
+      return scope.Close(String::New(server_state->response));
+    }
+  } else {
+    return scope.Close(String::New(client_state->response));
+  }
 }
-
-
-
-
-
-
-
-
-

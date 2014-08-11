@@ -20,8 +20,6 @@
 #include <gssapi/gssapi_generic.h>
 #include <gssapi/gssapi_krb5.h>
 
-#define krb5_get_err_text(context,code) error_message(code)
-
 #define AUTH_GSS_ERROR      -1
 #define AUTH_GSS_COMPLETE    1
 #define AUTH_GSS_CONTINUE    0
@@ -33,7 +31,7 @@
 typedef struct {
   int return_code;
   char *message;
-} gss_client_response;
+} gss_response;
 
 typedef struct {
   gss_ctx_id_t     context;
@@ -54,17 +52,15 @@ typedef struct {
   char*            response;
 } gss_server_state;
 
-// char* server_principal_details(const char* service, const char* hostname);
+gss_response *authenticate_gss_client_init(const char* service, long int gss_flags, gss_client_state* state);
+gss_response *authenticate_gss_client_clean(gss_client_state *state);
+gss_response *authenticate_gss_client_step(gss_client_state *state, const char *challenge);
+gss_response *authenticate_gss_client_unwrap(gss_client_state* state, const char* challenge);
+gss_response *authenticate_gss_client_wrap(gss_client_state* state, const char* challenge, const char* user);
 
-gss_client_response *authenticate_gss_client_init(const char* service, long int gss_flags, gss_client_state* state);
-gss_client_response *authenticate_gss_client_clean(gss_client_state *state);
-gss_client_response *authenticate_gss_client_step(gss_client_state *state, const char *challenge);
-gss_client_response *authenticate_gss_client_unwrap(gss_client_state* state, const char* challenge);
-gss_client_response *authenticate_gss_client_wrap(gss_client_state* state, const char* challenge, const char* user);
+gss_response *authenticate_gss_server_init(const char* service, gss_server_state* state);
+gss_response *authenticate_gss_server_clean(gss_server_state *state);
+gss_response *authenticate_gss_server_step(gss_server_state *state, const char *challenge);
 
-int authenticate_gss_server_init(const char* service, gss_server_state* state);
-int authenticate_gss_server_clean(gss_server_state *state);
-// int authenticate_gss_server_step(gss_server_state *state, const char *challenge);
-
-gss_client_response *gss_error(OM_uint32 err_maj, OM_uint32 err_min);
+gss_response *gss_error(OM_uint32 err_maj, OM_uint32 err_min);
 #endif
